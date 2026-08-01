@@ -1,0 +1,7 @@
+target/
+recipe-library.json
+*.tmp
+.idea/
+.vscode/
+*.iml
+.antigravitycli/
