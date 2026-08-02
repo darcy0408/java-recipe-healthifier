@@ -133,6 +133,14 @@ class MainTest {
         assertTrue(result.stderr().contains("cannot be combined"));
     }
 
+    @Test
+    void rejectsInvalidServerPortWithoutStartingServer() {
+        CommandResult result = command(request -> null, "--serve", "70000");
+
+        assertEquals(2, result.exitCode());
+        assertTrue(result.stderr().contains("port must be between 1 and 65535"));
+    }
+
     private static CommandResult command(com.healthifier.application.ConversionService service,
                                          String... arguments) {
         ByteArrayOutputStream stdout = new ByteArrayOutputStream();

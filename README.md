@@ -83,6 +83,16 @@ java -jar target/java-recipe-healthifier-1.0-SNAPSHOT.jar --delete <entry-id>
 
 Run `java -jar target/java-recipe-healthifier-1.0-SNAPSHOT.jar --help` for the complete CLI syntax.
 
+## Use from a phone
+
+Start the dependency-free local web interface:
+
+```powershell
+java -jar target/java-recipe-healthifier-1.0-SNAPSHOT.jar --serve 8080
+```
+
+The terminal prints localhost and LAN addresses. Open the LAN address on a phone connected to the same trusted Wi-Fi network. Recipes remain on the computer running the JAR. Press `Ctrl+C` to stop the server.
+
 ## Contest documentation
 
 - [Hackster submission story](docs/HACKSTER_SUBMISSION.md)

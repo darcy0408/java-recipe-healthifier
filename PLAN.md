@@ -14,6 +14,7 @@ Make Recipe Healthifier honest on realistic recipes, demonstrate Java 26 intenti
 - Expand the initial substitution set and choose replacements by compatibility with all selected goals.
 - Prefer HTTP/3 through Java 26's final HTTP Client API.
 - Remove unused preview compiler configuration and the unused preferences module.
+- Add a responsive, phone-accessible local server with form validation and security controls.
 
 ## In progress
 
@@ -21,7 +22,6 @@ Make Recipe Healthifier honest on realistic recipes, demonstrate Java 26 intenti
 
 ## Next
 
-- Add a local phone-accessible server mode.
 - Add Unix Maven Wrapper and Java 26 CI.
 - Add a license after the owner selects MIT or Apache-2.0.
 - Update contest documentation and demo only after behavior is stable.
