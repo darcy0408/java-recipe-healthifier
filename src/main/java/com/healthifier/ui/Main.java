@@ -123,7 +123,13 @@ public final class Main {
 
     private static void printIngredient(ConvertedIngredient ingredient, PrintStream out) {
         out.print("- " + ingredient.text());
-        ingredient.appliedSwap().ifPresent(swap -> out.print(" [swapped from " + swap.from() + "]"));
+        if (!ingredient.appliedSwaps().isEmpty()) {
+            out.print(" [swapped ");
+            out.print(ingredient.appliedSwaps().stream()
+                .map(swap -> swap.from() + " -> " + swap.to())
+                .collect(Collectors.joining("; ")));
+            out.print("]");
+        }
         out.println();
     }
 

@@ -1,6 +1,5 @@
 module com.healthifier {
     requires java.net.http;
-    requires java.prefs;
     requires jdk.httpserver;
     
     exports com.healthifier.ui;

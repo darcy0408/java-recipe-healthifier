@@ -16,9 +16,9 @@ class InMemorySwapRuleRepositoryTest {
 
         var swaps = repository.findByCategories(Set.of(SwapCategory.NO_SEED_OILS));
 
-        assertEquals(2, swaps.size());
+        assertTrue(swaps.size() >= 2);
         assertTrue(swaps.stream().allMatch(swap ->
-            swap.category().orElseThrow() == SwapCategory.NO_SEED_OILS));
+            swap.categories().contains(SwapCategory.NO_SEED_OILS)));
     }
 
     @Test

@@ -80,15 +80,24 @@ final class LibraryEntryJsonCodec {
         map.put("originalQuantity", ingredient.originalQuantity().orElse(null));
         map.put("convertedQuantity", ingredient.convertedQuantity().orElse(null));
         map.put("unit", ingredient.unit().orElse(null));
-        map.put("appliedSwap", ingredient.appliedSwap().map(LibraryEntryJsonCodec::swapToMap).orElse(null));
+        map.put("appliedSwaps", ingredient.appliedSwaps().stream()
+            .map(LibraryEntryJsonCodec::swapToMap).toList());
         return map;
     }
 
     private static ConvertedIngredient ingredientFromMap(Map<String, Object> map) {
         return new ConvertedIngredient(text(map, "text"), bool(map, "changed"), optionalText(map, "original"),
             optionalText(map, "reason"), optionalText(map, "ratioNote"), optionalDecimal(map, "originalQuantity"),
-            optionalDecimal(map, "convertedQuantity"), optionalText(map, "unit"),
-            Optional.ofNullable(map.get("appliedSwap")).map(value -> swapFromMap(object(value, "appliedSwap"))));
+            optionalDecimal(map, "convertedQuantity"), optionalText(map, "unit"), appliedSwaps(map));
+    }
+
+    private static List<Swap> appliedSwaps(Map<String, Object> map) {
+        Object values = map.get("appliedSwaps");
+        if (values instanceof List<?> list) {
+            return list.stream().map(value -> swapFromMap(object(value, "applied swap"))).toList();
+        }
+        Object legacy = map.get("appliedSwap");
+        return legacy == null ? List.of() : List.of(swapFromMap(object(legacy, "appliedSwap")));
     }
 
     private static Map<String, Object> stepToMap(ConvertedStep step) {
