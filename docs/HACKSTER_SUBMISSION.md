@@ -6,6 +6,8 @@
 
 Recipe Healthifier is a Java 26 command-line application that reads a recipe from a text file or webpage, applies health-focused ingredient substitutions, explains every change, reports rule compliance, and optionally saves the converted recipe in a local library.
 
+Source code: <https://github.com/darcy0408/java-recipe-healthifier>
+
 ## The problem
 
 Changing how a household eats sounds simple until every recipe must be checked ingredient by ingredient. Seed oils, gluten, dairy, ultra-processed foods, and carbohydrate-heavy ingredients can hide in otherwise familiar meals. Reworking quantities and remembering substitutions adds friction at exactly the moment someone is trying to cook.

@@ -23,10 +23,10 @@ Hackster's registration email confirms that project submissions close August 16,
 
 - [ ] Confirm every eligibility statement applies to you.
 - [x] Obtain written deadline confirmation from Hackster: August 16, 2026 at 11:59 PM PT.
-- [ ] Create a public GitHub or equivalent repository.
-- [ ] Review the repository for secrets, private information, and third-party assets.
+- [x] Create a public GitHub repository: <https://github.com/darcy0408/java-recipe-healthifier>
+- [x] Review the repository for secrets, private information, and unintended third-party assets.
 - [ ] Add an open-source license only if you are comfortable granting it.
-- [ ] Push the complete source, tests, Maven wrapper, `pom.xml`, README, and `docs` folder.
+- [x] Push the complete source, tests, Maven wrapper, `pom.xml`, README, and `docs` folder.
 - [ ] Record a 90–120 second demo using `DEMO_SCRIPT.md`.
 - [ ] Upload the demo video and verify its visibility.
 - [ ] Capture at least two screenshots: successful conversion and saved-library listing.
