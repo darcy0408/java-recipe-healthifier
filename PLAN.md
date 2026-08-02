@@ -17,6 +17,7 @@ Make Recipe Healthifier honest on realistic recipes, demonstrate Java 26 intenti
 - Add a responsive, phone-accessible local server with form validation and security controls.
 - Add cross-platform Maven wrappers and Java 26 continuous integration.
 - Update the contest story, checklist, and demo around the stable phone workflow and honest compliance.
+- Release the repository under the MIT License.
 
 ## In progress
 
@@ -24,7 +25,7 @@ Make Recipe Healthifier honest on realistic recipes, demonstrate Java 26 intenti
 
 ## Next
 
-- Add a license after the owner selects MIT or Apache-2.0.
+- Record the demo, capture submission screenshots, and complete the Hackster entry.
 
 ## Verification
 

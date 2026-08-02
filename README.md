@@ -97,6 +97,10 @@ java -jar target/java-recipe-healthifier-1.0-SNAPSHOT.jar --serve 8080
 
 The terminal prints localhost and LAN addresses. Open the LAN address on a phone connected to the same trusted Wi-Fi network. Recipes remain on the computer running the JAR. Press `Ctrl+C` to stop the server.
 
+## License
+
+Released under the [MIT License](LICENSE).
+
 ## Contest documentation
 
 - [Hackster submission story](docs/HACKSTER_SUBMISSION.md)
