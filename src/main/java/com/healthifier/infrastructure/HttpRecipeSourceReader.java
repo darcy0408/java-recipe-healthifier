@@ -16,6 +16,7 @@ public final class HttpRecipeSourceReader implements RecipeSourceReader {
 
     public HttpRecipeSourceReader() {
         this(HttpClient.newBuilder()
+            .version(HttpClient.Version.HTTP_3)
             .connectTimeout(Duration.ofSeconds(10))
             .followRedirects(HttpClient.Redirect.NORMAL)
             .build());

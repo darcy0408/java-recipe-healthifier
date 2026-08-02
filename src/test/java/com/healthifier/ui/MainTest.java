@@ -44,7 +44,7 @@ class MainTest {
 
         String output = stdout.toString(StandardCharsets.UTF_8);
         assertEquals(0, exitCode);
-        assertTrue(output.contains("- 1 cup allulose [swapped from sugar]"));
+        assertTrue(output.contains("- 1 cup allulose [swapped sugar -> allulose]"));
         assertTrue(output.contains("- KETO: COMPLIANT"));
         assertEquals("", stderr.toString(StandardCharsets.UTF_8));
     }

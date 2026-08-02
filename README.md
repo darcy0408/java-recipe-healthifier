@@ -4,6 +4,10 @@
 
 A Java 26 command-line application that applies health-focused ingredient substitutions to recipes supplied as text files or recipe-page URLs.
 
+## Modern Java 26
+
+Recipe URL ingestion opts into the final HTTP/3 support delivered in Java 26 (JEP 517), with transparent fallback for servers that do not advertise HTTP/3. The project also uses records, sealed interfaces, pattern matching, text blocks, modules, immutable collection factories, `HttpClient`, and atomic NIO file operations—all without runtime dependencies.
+
 ## Build
 
 Use a Java 26 JDK:

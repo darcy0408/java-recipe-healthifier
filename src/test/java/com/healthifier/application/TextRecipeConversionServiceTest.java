@@ -87,4 +87,116 @@ class TextRecipeConversionServiceTest {
         assertThrows(UnsupportedOperationException.class,
             () -> service.convert(new ConversionRequest(input, Set.of(RuleId.KETO))));
     }
+
+    @Test
+    void appliesLongestMatchesAndMultipleSwapsWithoutProducingCompoundNonsense() {
+        ConvertInput input = new ConvertInput.Text("""
+            Coated Chicken
+            Ingredients:
+            - 1 cup panko breadcrumbs and 2 tbsp brown sugar
+            - 1 tbsp vegetable oil and 1 cup all-purpose flour
+            Instructions:
+            - Mix the brown sugar with the vegetable oil.
+            - Dredge in all-purpose flour and panko breadcrumbs.
+            """, "user-1", false);
+
+        var result = service.convert(new ConversionRequest(input,
+            Set.of(RuleId.KETO, RuleId.GLUTEN_FREE, RuleId.NO_SEED_OILS)));
+
+        assertEquals("1 cup crushed pork rinds and 2 tbsp allulose",
+            result.ingredients().get(0).text());
+        assertEquals(2, result.ingredients().get(0).appliedSwaps().size());
+        assertEquals("1 tbsp avocado oil and 1 cup almond flour",
+            result.ingredients().get(1).text());
+        assertEquals(2, result.ingredients().get(1).appliedSwaps().size());
+        assertFalse(result.ingredients().get(0).text().contains("panko crushed"));
+        assertFalse(result.ingredients().get(0).text().contains("brown allulose"));
+        assertEquals("Mix the allulose with the avocado oil.", result.steps().get(0).text());
+        assertEquals("Dredge in almond flour and crushed pork rinds.", result.steps().get(1).text());
+        assertTrue(result.steps().stream().allMatch(step -> step.changed()));
+    }
+
+    @Test
+    void reportsHonestPartialAndNotPossibleComplianceForUnknownViolations() {
+        ConvertInput input = new ConvertInput.Text("""
+            Chicken Parmesan
+            Ingredients:
+            - 2 cups whole wheat flour
+            - 3 tbsp rice bran oil
+            - 1 tbsp butter
+            - 1/2 cup mozzarella cheese
+            - 2 chicken breasts
+            Instructions:
+            - Coat and cook the chicken.
+            """, "user-1", false);
+
+        var result = service.convert(new ConversionRequest(input,
+            Set.of(RuleId.GLUTEN_FREE, RuleId.NO_SEED_OILS, RuleId.DAIRY_FREE,
+                RuleId.HIGH_PROTEIN)));
+
+        assertEquals("2 cups almond flour", result.ingredients().get(0).text());
+        assertEquals(RuleCompliance.COMPLIANT, result.ruleCompliance().get("GLUTEN_FREE"));
+        assertEquals(RuleCompliance.NOT_POSSIBLE, result.ruleCompliance().get("NO_SEED_OILS"));
+        assertEquals(RuleCompliance.PARTIAL, result.ruleCompliance().get("DAIRY_FREE"));
+        assertEquals(RuleCompliance.COMPLIANT, result.ruleCompliance().get("HIGH_PROTEIN"));
+        assertTrue(result.unfixable().stream().anyMatch(item -> item.contains("rice bran oil")));
+        assertTrue(result.unfixable().stream().anyMatch(item -> item.contains("mozzarella cheese")));
+    }
+
+    @Test
+    void evaluatesCustomAvoidEvenWhenAnotherSwapOccursOnTheSameLine() {
+        ConvertInput input = new ConvertInput.Text("""
+            Dressing
+            Ingredients:
+            - 1 tbsp vegetable oil and 1 tsp black pepper
+            Instructions:
+            - Mix.
+            """, "user-1", false);
+
+        var result = service.convert(new ConversionRequest(input, Set.of(RuleId.NO_SEED_OILS),
+            Optional.of("black pepper")));
+
+        assertEquals("1 tbsp avocado oil and 1 tsp black pepper",
+            result.ingredients().getFirst().text());
+        assertEquals(RuleCompliance.NOT_POSSIBLE,
+            result.ruleCompliance().get("CUSTOM_AVOID"));
+        assertTrue(result.unfixable().stream().anyMatch(item -> item.contains("black pepper")));
+    }
+
+    @Test
+    void marksEvidenceBasedGoalPartialWhenNoProteinSourceIsRecognized() {
+        ConvertInput input = new ConvertInput.Text("""
+            Fruit Plate
+            Ingredients:
+            - 1 sliced apple
+            Instructions:
+            - Serve.
+            """, "user-1", false);
+
+        var result = service.convert(new ConversionRequest(input, Set.of(RuleId.HIGH_PROTEIN)));
+
+        assertEquals(RuleCompliance.PARTIAL, result.ruleCompliance().get("HIGH_PROTEIN"));
+    }
+
+    @Test
+    void choosesAReplacementCompatibleWithAllSelectedGoals() {
+        ConvertInput input = new ConvertInput.Text("""
+            Dinner
+            Ingredients:
+            - 8 oz spaghetti
+            - 1 cup whole milk
+            Instructions:
+            - Add the whole milk to the spaghetti.
+            """, "user-1", false);
+
+        var result = service.convert(new ConversionRequest(input,
+            Set.of(RuleId.GLUTEN_FREE, RuleId.KETO, RuleId.DAIRY_FREE)));
+
+        assertEquals("8 oz zucchini noodles", result.ingredients().get(0).text());
+        assertEquals("1 cup unsweetened almond beverage", result.ingredients().get(1).text());
+        assertTrue(result.ruleCompliance().values().stream()
+            .allMatch(status -> status == RuleCompliance.COMPLIANT));
+        assertEquals("Add the unsweetened almond beverage to the zucchini noodles.",
+            result.steps().getFirst().text());
+    }
 }
