@@ -4,7 +4,7 @@
 
 ## Short description
 
-Recipe Healthifier is a Java 26 command-line application that reads a recipe from a text file or webpage, applies health-focused ingredient substitutions, explains every change, reports rule compliance, and optionally saves the converted recipe in a local library.
+Recipe Healthifier is a local Java 26 application that reads recipes from text files or webpages, applies explainable health-focused substitutions, computes rule compliance, and serves a phone-friendly interface over a home network without cloud services.
 
 Source code: <https://github.com/darcy0408/java-recipe-healthifier>
 
@@ -12,14 +12,16 @@ Source code: <https://github.com/darcy0408/java-recipe-healthifier>
 
 Changing how a household eats sounds simple until every recipe must be checked ingredient by ingredient. Seed oils, gluten, dairy, ultra-processed foods, and carbohydrate-heavy ingredients can hide in otherwise familiar meals. Reworking quantities and remembering substitutions adds friction at exactly the moment someone is trying to cook.
 
-Recipe Healthifier turns that repetitive review into a transparent local workflow. A cook selects goals such as `KETO`, `GLUTEN_FREE`, or `NO_SEED_OILS`; the application produces a revised recipe, identifies each swap, preserves the instructions, and flags custom avoidances it cannot resolve. It does not pretend to provide medical advice—the substitutions are practical starting points that the cook can review.
+Recipe Healthifier turns that repetitive review into a transparent local workflow. A cook selects goals such as `KETO`, `GLUTEN_FREE`, or `NO_SEED_OILS`; the application produces a revised recipe, identifies each swap, updates matching instruction text, and flags recognized constraints it cannot resolve. It does not pretend to provide medical advice—the substitutions are practical starting points that the cook can review.
 
 ## What it does
 
 - Accepts structured recipe text from a local file.
 - Downloads recipe pages and extracts Schema.org `Recipe` JSON-LD.
 - Applies deterministic, explainable ingredient swaps for eight health preferences.
-- Reports compliant and unresolved constraints.
+- Computes `COMPLIANT`, `PARTIAL`, or `NOT_POSSIBLE` from the final ingredients instead of assuming success.
+- Rewrites matching ingredient names in the instructions using swaps actually applied.
+- Serves an accessible, responsive interface to phones on the same trusted Wi-Fi network.
 - Saves complete conversion results to a local JSON recipe library.
 - Lists, displays, and deletes saved recipes.
 - Runs as one executable modular JAR with no runtime libraries.
@@ -38,7 +40,7 @@ No dedicated hardware, cloud account, API key, or paid service is required.
 
 ## Architecture
 
-The project separates domain state, application orchestration, infrastructure adapters, and the CLI:
+The project separates domain state, application orchestration, infrastructure adapters, and its CLI/web interfaces:
 
 ```text
 Text file ──────────────┐
@@ -66,7 +68,9 @@ The Maven build explicitly targets Java 26 using `<release>26</release>`. The im
 - Switch expressions parse CLI options and JSON escapes clearly.
 - Text blocks make recipe fixtures readable.
 - The Java module system declares and exports application boundaries.
-- `HttpClient` provides redirects, timeouts, and interruption-safe URL ingestion.
+- Java 26's finalized HTTP/3 support (JEP 517) is requested through `HttpClient.Version.HTTP_3`, with transparent protocol fallback.
+- Virtual threads handle independent local web requests without adding a web framework.
+- `jdk.httpserver` provides the phone interface using only the JDK.
 - `Stream.toList`, `List.copyOf`, `Set.copyOf`, and `Map.copyOf` create immutable snapshots.
 - `Path`, atomic file moves, and a read/write lock provide durable local persistence.
 
@@ -92,7 +96,7 @@ The Maven build explicitly targets Java 26 using `<release>26</release>`. The im
    target/java-recipe-healthifier-1.0-SNAPSHOT.jar
    ```
 
-On macOS or Linux, use `./mvnw clean verify` if the Unix wrapper is included, or `mvn clean verify` with Maven installed.
+On macOS or Linux, use `./mvnw clean verify`. GitHub Actions runs that command on Java 26 for every pull request.
 
 ## Prepare a recipe
 
@@ -124,6 +128,16 @@ java -jar target/java-recipe-healthifier-1.0-SNAPSHOT.jar `
 
 The output substitutes almond flour, allulose, and avocado oil, explains the changes, and prints the saved entry ID.
 
+## Use from a phone
+
+Start the built-in local server:
+
+```powershell
+java -jar target/java-recipe-healthifier-1.0-SNAPSHOT.jar --serve 8080
+```
+
+The terminal prints localhost and LAN addresses. Open the LAN address on a phone connected to the same trusted Wi-Fi network, paste a recipe, select health goals, and review the result. Press `Ctrl+C` to stop the server. The server includes request limits, server-side validation, CSRF protection, HTML escaping, and restrictive browser security headers.
+
 To import a public recipe page containing Schema.org Recipe metadata:
 
 ```powershell
@@ -151,14 +165,14 @@ The default store is `recipe-library.json`. Use `--library-file <path>` to choos
 
 The application validates domain objects on construction and defensively copies collections. URL fetching follows normal redirects, uses connection/request timeouts, accepts HTML only, and limits responses to five million characters. Library updates use a temporary file and atomic replacement where supported, so an interrupted write is less likely to damage saved data.
 
-The automated suite covers domain invariants, conversion behavior, JSON-LD shapes, source routing, repository filtering, persistence round trips, corruption handling, and complete CLI library workflows. Run all tests with `mvnw clean verify`.
+The 37-test automated suite covers domain invariants, adversarial conversion and compliance behavior, JSON-LD shapes, source routing, repository filtering, persistence round trips, corruption handling, CLI workflows, and local web security boundaries. Run all tests with `mvnw clean verify`.
 
 ## Limitations and next steps
 
 - Ingredient matching is intentionally deterministic and phrase-based; it does not make medical or nutritional claims.
 - URL import depends on the page exposing valid Schema.org Recipe JSON-LD.
 - Image input exists in the domain model, but OCR is not included in this release.
-- Future work could add nutrition databases, configurable rule packs, richer conflict resolution, and an accessible desktop interface.
+- Future work could add nutrition databases, configurable rule packs, richer conflict resolution, and installable mobile packaging.
 
 ## Why it matters
 

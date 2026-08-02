@@ -11,6 +11,9 @@ Hackster's registration email confirms that project submissions close August 16,
 - [x] Local JSON recipe library
 - [x] Executable JAR configuration
 - [x] Automated test suite
+- [x] Java 26 Linux CI and cross-platform Maven launchers
+- [x] Phone-friendly local web interface
+- [x] Honest unresolved-rule reporting
 - [x] Project name and short description
 - [x] Bill of materials
 - [x] Full beginner instructions
@@ -29,7 +32,7 @@ Hackster's registration email confirms that project submissions close August 16,
 - [x] Push the complete source, tests, Maven wrapper, `pom.xml`, README, and `docs` folder.
 - [ ] Record a 90–120 second demo using `DEMO_SCRIPT.md`.
 - [ ] Upload the demo video and verify its visibility.
-- [ ] Capture at least two screenshots: successful conversion and saved-library listing.
+- [ ] Capture at least three screenshots: phone conversion, honest `NOT_POSSIBLE` result, and green Java 26 CI.
 - [ ] Create the Hackster project and paste/adapt `HACKSTER_SUBMISSION.md`.
 - [ ] Upload `assets/recipe-healthifier-cover.png` as the cover.
 - [ ] Add the screenshots and demo video to the project story.
@@ -46,4 +49,4 @@ java -version
 java -jar target\java-recipe-healthifier-1.0-SNAPSHOT.jar --help
 ```
 
-Do not add OCR, a graphical interface, or new external integrations before submitting unless every required item above is already complete.
+Do not add OCR or new external integrations before submitting unless every required item above is already complete.

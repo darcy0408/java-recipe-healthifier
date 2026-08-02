@@ -4,7 +4,7 @@
 
 ![Recipe Healthifier cover](docs/assets/recipe-healthifier-cover.png)
 
-A Java 26 command-line application that applies health-focused ingredient substitutions to recipes supplied as text files or recipe-page URLs.
+A local Java 26 application that applies explainable health-focused substitutions through a CLI or phone-friendly web interface.
 
 ## Modern Java 26
 

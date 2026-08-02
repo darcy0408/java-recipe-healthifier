@@ -16,6 +16,7 @@ Make Recipe Healthifier honest on realistic recipes, demonstrate Java 26 intenti
 - Remove unused preview compiler configuration and the unused preferences module.
 - Add a responsive, phone-accessible local server with form validation and security controls.
 - Add cross-platform Maven wrappers and Java 26 continuous integration.
+- Update the contest story, checklist, and demo around the stable phone workflow and honest compliance.
 
 ## In progress
 
@@ -24,7 +25,6 @@ Make Recipe Healthifier honest on realistic recipes, demonstrate Java 26 intenti
 ## Next
 
 - Add a license after the owner selects MIT or Apache-2.0.
-- Update contest documentation and demo only after behavior is stable.
 
 ## Verification
 
@@ -34,4 +34,4 @@ $env:Path="$env:JAVA_HOME\bin;$env:Path"
 .\mvnw.cmd clean verify
 ```
 
-Latest verification after the first hardening slice: 33 tests, zero failures, Java 26.0.1.
+Latest local verification: 37 tests, zero failures, Java 26.0.1. GitHub Actions also passes on Linux with Java 26.
