@@ -47,6 +47,7 @@ public final class Main {
             }
             FileRecipeLibrary library = new FileRecipeLibrary(options.libraryFile());
             switch (options.action()) {
+                case SERVE -> serve(service, options.port(), out);
                 case LIST -> printLibrary(library.findAll(), out);
                 case SHOW -> {
                     LibraryEntry entry = library.findById(options.entryId())
@@ -80,11 +81,25 @@ public final class Main {
             err.println(usage());
             return 2;
         } catch (IOException exception) {
-            err.println("Error reading recipe: " + exception.getMessage());
+            err.println("I/O error: " + exception.getMessage());
             return 3;
+        } catch (InterruptedException exception) {
+            Thread.currentThread().interrupt();
+            return 130;
         } catch (RecipeLibraryException exception) {
             err.println("Library error: " + exception.getMessage());
             return 4;
+        }
+    }
+
+    private static void serve(ConversionService service, int port, PrintStream out)
+            throws IOException, InterruptedException {
+        try (LocalRecipeServer server = new LocalRecipeServer(service, port)) {
+            server.start();
+            out.println("Recipe Healthifier is available at:");
+            server.accessUrls().forEach(url -> out.println("  " + url));
+            out.println("Press Ctrl+C to stop.");
+            server.awaitShutdown();
         }
     }
 
@@ -138,8 +153,9 @@ public final class Main {
             Usage:
               java ... com.healthifier.ui.Main (--file <recipe.txt> | --url <https://...>)
                   --rules <RULE[,RULE...]>
-                  [--avoid <ingredient>] [--preview] [--save]
+                  [--avoid <ingredient>] [--save]
                   [--library-file <path>]
+              java ... com.healthifier.ui.Main --serve <port>
               java ... com.healthifier.ui.Main --library [--library-file <path>]
               java ... com.healthifier.ui.Main --show <entry-id> [--library-file <path>]
               java ... com.healthifier.ui.Main --delete <entry-id> [--library-file <path>]
@@ -155,49 +171,53 @@ public final class Main {
         String recipeUrl,
         Set<RuleId> rules,
         Optional<String> customAvoid,
-        boolean preview,
         boolean save,
         Action action,
         String entryId,
+        int port,
         Path libraryFile,
         boolean help
     ) {
         private static CliOptions parse(String[] args) {
             if (args.length == 0 || Arrays.asList(args).contains("--help")) {
-                return new CliOptions(null, null, Set.of(), Optional.empty(), false, false,
-                    Action.CONVERT, null, Path.of("recipe-library.json"), true);
+                return new CliOptions(null, null, Set.of(), Optional.empty(), false,
+                    Action.CONVERT, null, 0, Path.of("recipe-library.json"), true);
             }
 
             Path file = null;
             String url = null;
             Set<RuleId> rules = Set.of();
             Optional<String> avoid = Optional.empty();
-            boolean preview = false;
             boolean save = false;
             Action action = Action.CONVERT;
             String entryId = null;
+            int port = 0;
             Path libraryFile = Path.of("recipe-library.json");
-            int libraryActions = 0;
+            int specialActions = 0;
             for (int index = 0; index < args.length; index++) {
                 switch (args[index]) {
                     case "--file" -> file = Path.of(nextValue(args, ++index, "--file"));
                     case "--url" -> url = nextValue(args, ++index, "--url");
                     case "--rules" -> rules = parseRules(nextValue(args, ++index, "--rules"));
                     case "--avoid" -> avoid = Optional.of(nextValue(args, ++index, "--avoid"));
-                    case "--preview" -> preview = true;
                     case "--save" -> save = true;
-                    case "--library" -> { action = Action.LIST; libraryActions++; }
+                    case "--serve" -> {
+                        action = Action.SERVE;
+                        port = parsePort(nextValue(args, ++index, "--serve"));
+                        specialActions++;
+                    }
+                    case "--library" -> { action = Action.LIST; specialActions++; }
                     case "--show" -> {
-                        action = Action.SHOW; entryId = nextValue(args, ++index, "--show"); libraryActions++;
+                        action = Action.SHOW; entryId = nextValue(args, ++index, "--show"); specialActions++;
                     }
                     case "--delete" -> {
-                        action = Action.DELETE; entryId = nextValue(args, ++index, "--delete"); libraryActions++;
+                        action = Action.DELETE; entryId = nextValue(args, ++index, "--delete"); specialActions++;
                     }
                     case "--library-file" -> libraryFile = Path.of(nextValue(args, ++index, "--library-file"));
                     default -> throw new IllegalArgumentException("Unknown option: " + args[index]);
                 }
             }
-            if (libraryActions > 1) throw new IllegalArgumentException("Choose only one library command");
+            if (specialActions > 1) throw new IllegalArgumentException("Choose only one server or library command");
             if (action == Action.CONVERT) {
                 if ((file == null) == (url == null)) {
                     throw new IllegalArgumentException("Provide exactly one of --file or --url");
@@ -205,10 +225,10 @@ public final class Main {
                 if (rules.isEmpty() && avoid.isEmpty()) {
                     throw new IllegalArgumentException("--rules or --avoid is required");
                 }
-            } else if (file != null || url != null || save || preview || !rules.isEmpty() || avoid.isPresent()) {
-                throw new IllegalArgumentException("Conversion options cannot be combined with a library command");
+            } else if (file != null || url != null || save || !rules.isEmpty() || avoid.isPresent()) {
+                throw new IllegalArgumentException("Conversion options cannot be combined with a server or library command");
             }
-            return new CliOptions(file, url, rules, avoid, preview, save, action, entryId,
+            return new CliOptions(file, url, rules, avoid, save, action, entryId, port,
                 libraryFile, false);
         }
 
@@ -221,10 +241,20 @@ public final class Main {
         private ConvertInput toInput() throws IOException {
             ConvertInput.Builder builder = ConvertInput.builder()
                 .appUserId("local-cli")
-                .preview(preview);
+                .preview(false);
             return recipeFile != null
                 ? builder.text(Files.readString(recipeFile)).build()
                 : builder.url(recipeUrl).build();
+        }
+
+        private static int parsePort(String value) {
+            try {
+                int port = Integer.parseInt(value);
+                if (port < 1 || port > 65_535) throw new NumberFormatException();
+                return port;
+            } catch (NumberFormatException exception) {
+                throw new IllegalArgumentException("--serve port must be between 1 and 65535");
+            }
         }
 
         private static Set<RuleId> parseRules(String value) {
@@ -247,5 +277,5 @@ public final class Main {
         }
     }
 
-    private enum Action { CONVERT, LIST, SHOW, DELETE }
+    private enum Action { CONVERT, SERVE, LIST, SHOW, DELETE }
 }
