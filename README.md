@@ -1,8 +1,10 @@
 # Java Recipe Healthifier
 
+[![Java 26 CI](https://github.com/darcy0408/java-recipe-healthifier/actions/workflows/ci.yml/badge.svg)](https://github.com/darcy0408/java-recipe-healthifier/actions/workflows/ci.yml)
+
 ![Recipe Healthifier cover](docs/assets/recipe-healthifier-cover.png)
 
-A Java 26 command-line application that applies health-focused ingredient substitutions to recipes supplied as text files or recipe-page URLs.
+A local Java 26 application that applies explainable health-focused substitutions through a CLI or phone-friendly web interface.
 
 ## Modern Java 26
 
@@ -15,6 +17,8 @@ Use a Java 26 JDK:
 ```powershell
 .\mvnw.cmd clean verify
 ```
+
+On macOS or Linux, run `./mvnw clean verify`.
 
 The executable JAR is created at `target/java-recipe-healthifier-1.0-SNAPSHOT.jar`.
 
@@ -92,6 +96,10 @@ java -jar target/java-recipe-healthifier-1.0-SNAPSHOT.jar --serve 8080
 ```
 
 The terminal prints localhost and LAN addresses. Open the LAN address on a phone connected to the same trusted Wi-Fi network. Recipes remain on the computer running the JAR. Press `Ctrl+C` to stop the server.
+
+## License
+
+Released under the [MIT License](LICENSE).
 
 ## Contest documentation
 
