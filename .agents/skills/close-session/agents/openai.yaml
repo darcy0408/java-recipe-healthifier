@@ -1,0 +1,4 @@
+interface:
+  display_name: "Close Recipe Healthifier Session"
+  short_description: "Verify and hand off project work cleanly"
+  default_prompt: "Use $close-session to verify and hand off Recipe Healthifier work."

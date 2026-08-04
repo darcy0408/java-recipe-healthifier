@@ -1,0 +1,4 @@
+interface:
+  display_name: "Open Recipe Healthifier Session"
+  short_description: "Resume project work with verified context"
+  default_prompt: "Use $open-session to resume work on Recipe Healthifier safely."
